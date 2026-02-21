@@ -32,6 +32,7 @@ function ReadManifest() {
       "version": packageJSON.version,
       "name": humName,
       "logo": "https://i.imgur.com/VZK8qw2.png",
+      "background": "https://static.vecteezy.com/system/resources/previews/033/862/974/large_2x/abstract-orange-smoke-on-a-black-background-design-element-for-brochure-or-flyer-orange-smoke-isolated-on-black-background-ai-generated-free-photo.jpg",
       "description": packageJSON.description,
       "catalogs": [],
       "resources": [
