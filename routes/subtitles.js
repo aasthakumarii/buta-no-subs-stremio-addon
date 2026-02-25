@@ -151,7 +151,7 @@ function HandleSubRequest(req, res, next) {
       jimakuPromise = jimakuEntryPromise.then((jimakuEntry) => {
         console.log('\x1b[36mGot Jimaku entry:\x1b[39m', jimakuEntry.id)
         console.log('\x1b[33mSearching for subtitle files in Jimaku...\x1b[39m')
-        return jimakuAPI.GetJimakuFiles(jimakuEntry.id, episode).then((jimakuFiles) => {
+        return jimakuAPI.GetJimakuFiles(jimakuEntry.id, episode, season).then((jimakuFiles) => {
           console.log(`\x1b[36mGot ${jimakuFiles.length} Jimaku files\x1b[39m`)
           subtitles = subtitles.concat(jimakuFiles) //Concat the files to the subtitles array
         }).catch((err) => {
