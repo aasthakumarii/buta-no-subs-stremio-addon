@@ -56,8 +56,18 @@ exports.GetJimakuFiles = async function (jimakuID, episodeNumber = undefined) {
     if (resp === undefined) throw Error(`undefined response!`)
     return resp.json()
   }).then((data) => {
-    if (data === undefined || !data[0]) throw Error("Invalid response!")
+    if (data === undefined || !data[0]) { //See issue #13
+      return fetch(`${JIMAKU_API_BASE}/entries/${jimakuID}/files`, options).then((resp) => {
+        if ((!resp.ok) || resp.status !== 200) throw Error(`HTTP error! Status: ${resp.status}`)
+        if (resp === undefined) throw Error(`undefined response!`)
+        return resp.json()
+      }).then((data) => {
+        if (data === undefined || !data[0]) throw Error("Invalid response!")
+        return FilterByEpisode(data, episodeNumber)
+      })
+    } else return data
     //Parse the data to get the files
+  }).then((data) => {
     return ParseJimakuFiles(data)
   })
 }
@@ -72,4 +82,15 @@ function ParseJimakuFiles(data) {
     subtitles.push({ id: `${subtitles.length + 1}`, url: subEntry.url, lang: "jpn" });
   }
   return subtitles;
+}
+
+function FilterByEpisode(data, episodeNumber) {
+  //data is an array of files, we want to filter by episode number
+  return data.filter((subEntry) => {
+    //from japsub-api. Clean title from [*], v2, extensions, sources and dates
+    const title = subEntry.name.replace(/[\[\(][0-9A-Za-z\-\,\ \.]*[\]\)]/g,"").replace(/[vV][0-9]+/,"").replace(/\.(txt|md|sup)$/, "").replace(/(1080p|720p|WEBRip|Netflix).*/, "").replace(/[\[\(][0-9]+(\.|-)[0-9]*(\.|-)[0-9]*[\]\)]/, "").replace(/([Ss][Ee][Aa][Ss][Oo][Nn]|[Ss]).?[0-9]*/g, "");
+    const singleRegex = new RegExp(`[Ee]?(?<![0-9])0?(${episodeNumber})(?![0-9])`, "g");
+    const singleMatch = singleRegex.exec(title);
+    return singleMatch !== null;
+  })
 }
