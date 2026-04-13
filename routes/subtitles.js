@@ -153,7 +153,13 @@ function HandleSubRequest(req, res, next) {
         console.log('\x1b[33mSearching for subtitle files in Jimaku...\x1b[39m')
         return jimakuAPI.GetJimakuFiles(jimakuEntry.id, episode, season).then((jimakuFiles) => {
           console.log(`\x1b[36mGot ${jimakuFiles.length} Jimaku files\x1b[39m`)
-          subtitles = subtitles.concat(jimakuFiles) //Concat the files to the subtitles array
+
+          jimakuFiles = jimakuFiles.map(file => ({
+            ...file,
+            source: "jimaku"
+          }))
+
+          subtitles = subtitles.concat(jimakuFiles)
         }).catch((err) => {
           console.error('\x1b[31mFailed getting Jimaku files:\x1b[39m ' + err)
         })
@@ -168,9 +174,15 @@ function HandleSubRequest(req, res, next) {
         return kitsunekkoAPI.SearchForKitsunekkoEntry(animeMeta.name).then((foundAnime) => {
           console.log('\x1b[33mSearching for subtitle files in kitsunekko...\x1b[39m')
           return kitsunekkoAPI.GetKitsunekkoSubtitles(foundAnime.url, episode, season).then((kitsunekkoSubs) => {
-            console.log(`\x1b[36mGot ${kitsunekkoSubs.length} kitsunekko files\x1b[39m`)
-            subtitles = subtitles.concat(kitsunekkoSubs) //Concat the files to the subtitles array
-          })
+          console.log(`\x1b[36mGot ${kitsunekkoSubs.length} kitsunekko files\x1b[39m`)
+
+          kitsunekkoSubs = kitsunekkoSubs.map(file => ({
+            ...file,
+            source: "kitsunekko"
+          }))
+
+          subtitles = subtitles.concat(kitsunekkoSubs)
+        })
         }).catch((err) => {
           console.error('\x1b[31mFailed getting kitsunekko subtitles:\x1b[39m ' + err)
         })
@@ -181,8 +193,14 @@ function HandleSubRequest(req, res, next) {
       console.log('\x1b[33mSearching for subtitle files in MySubs...\x1b[39m')
       mySubsPromise = mySubsAPI.GetMySubs(animeMetadata.imdbID || animeMetadata.engTitle, season, episode).then((mySubs) => {
         console.log(`\x1b[36mGot ${mySubs.length} MySubs files\x1b[39m`)
-        subtitles = subtitles.concat(mySubs) //Concat the files to the subtitles array
-      }).catch((err) => {
+
+        mySubs = mySubs.map(file => ({
+          ...file,
+          source: "mysubs"
+        }))
+
+        subtitles = subtitles.concat(mySubs)
+        }).catch((err) => {
         console.error('\x1b[31mFailed getting MySubs subtitles:\x1b[39m ' + err)
       })
     } else {
